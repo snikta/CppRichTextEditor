@@ -1,0 +1,1 @@
+C:\C++\CppRichTextEditor\x64\Debug\RichTextEditor.exe

@@ -12,6 +12,7 @@
 #include "LoadBitmapFromFile.h"
 #include "SafeRelease.h"
 #include "colorConversion.h"
+using namespace std;
 using std::string;
 using std::vector;
 using std::map;
@@ -60,6 +61,26 @@ void RenderBitmap(PCWSTR fileName, double x, double y, ID2D1HwndRenderTarget* pR
 	}
 }
 
+typedef struct HitTestMetrics {
+	float	left;
+	float	top;
+	float	width;
+	float	height;
+	UINT32	textPosition;
+} HitTestMetrics;
+
+typedef struct GlyphSize {
+	float	width;
+	float	height;
+} GlyphSize;
+
+ID2D1Factory* g_pD2DFactory = NULL;
+IDWriteFontFace* g_pFontFace = NULL;
+IDWriteFontFile* g_pFontFile = NULL;
+IDWriteTextFormat* g_pTextFormat = NULL;
+
+map<int, GlyphSize> GlyphSizes = {};
+
 class MainWindow : public BaseWindow<MainWindow>
 {
     ID2D1Factory            *pFactory;
@@ -69,7 +90,7 @@ class MainWindow : public BaseWindow<MainWindow>
 	IDWriteTextFormat		*m_pTextFormat;
 	IDWriteTextFormat		*m_pFontNamesTextFormat;
 	IDWriteTextFormat		*m_pFontSizesTextFormat;
-	ID2D1SolidColorBrush	*pGrayBrush;
+	ID2D1SolidColorBrush	*pPaleYellowBrush;
 	DWRITE_TEXT_METRICS		fNameMetrics;
 	DWRITE_TEXT_METRICS		fSizeMetrics;
 	vector<string>			fontNames = { "Merriweather", "Arial", "Courier New", "Times New Roman", "Comic Sans MS", "Impact", "Georgia", "Trebuchet MS", "Webdings", "Verdana" };
@@ -83,7 +104,7 @@ class MainWindow : public BaseWindow<MainWindow>
 	float					cursorX;
 	float					cursorY;
 	HCURSOR					hCursor;
-	DWRITE_HIT_TEST_METRICS hitTestMetrics;
+	HitTestMetrics hitTestMetrics;
 	BOOL					isTrailingHit;
 	UINT32					textPosition;
 	UINT32					startTextPosition;
@@ -113,8 +134,102 @@ class MainWindow : public BaseWindow<MainWindow>
 	void    OnMouseMove(int pixelX, int pixelY, DWORD flags);
 	void	SelectText();
 	void	toggleFormatting(string format, string newValue);
+	void	HitTestTextPosition(
+		UINT32 textPosition,
+		bool isTrailing,
+		float* pointX,
+		float* pointY,
+		HitTestMetrics* metrics);
 
 public:
+
+	GlyphSize GetCharWidth(wchar_t c)
+	{
+		GlyphSize retval = {};
+
+		// Create Direct2D Factory
+		HRESULT hr = D2D1CreateFactory(
+			D2D1_FACTORY_TYPE_SINGLE_THREADED,
+			&g_pD2DFactory
+		);
+		if (FAILED(hr))
+		{
+			MessageBox(NULL, L"Create Direct2D factory failed!", L"Error", 0);
+			return retval;
+		}
+
+		// Create font file reference
+		const WCHAR* filePath = L"C:/Windows/Fonts/arial.ttf";
+		hr = m_pDWriteFactory->CreateFontFileReference(
+			filePath,
+			NULL,
+			&g_pFontFile
+		);
+		if (FAILED(hr))
+		{
+			MessageBox(NULL, L"Create font file reference failed!", L"Error", 0);
+			return retval;
+		}
+
+		// Create font face
+		IDWriteFontFile* fontFileArray[] = { g_pFontFile };
+		m_pDWriteFactory->CreateFontFace(
+			DWRITE_FONT_FACE_TYPE_TRUETYPE,
+			1,
+			fontFileArray,
+			0,
+			DWRITE_FONT_SIMULATIONS_NONE,
+			&g_pFontFace
+		);
+		if (FAILED(hr))
+		{
+			MessageBox(NULL, L"Create font file face failed!", L"Error", 0);
+			return retval;
+		}
+
+		wchar_t textString[] = { c, '\0' };
+
+		// Get text length
+		UINT32 textLength = (UINT32)wcslen(textString);
+
+		UINT32* pCodePoints = new UINT32[textLength];
+		ZeroMemory(pCodePoints, sizeof(UINT32) * textLength);
+
+		UINT16* pGlyphIndices = new UINT16[textLength];
+		ZeroMemory(pGlyphIndices, sizeof(UINT16) * textLength);
+
+		for (unsigned int i = 0; i < textLength; ++i)
+		{
+			pCodePoints[i] = textString[i];
+		}
+
+		// Get glyph indices
+		hr = g_pFontFace->GetGlyphIndices(
+			pCodePoints,
+			textLength,
+			pGlyphIndices
+		);
+		if (FAILED(hr))
+		{
+			MessageBox(NULL, L"Get glyph indices failed!", L"Error", 0);
+			return retval;
+		}
+
+		DWRITE_GLYPH_METRICS* glyphmetrics = new DWRITE_GLYPH_METRICS[textLength];
+		g_pFontFace->GetDesignGlyphMetrics(pGlyphIndices, textLength, glyphmetrics);
+
+		DWRITE_FONT_METRICS* fontmetrics = new DWRITE_FONT_METRICS;
+
+		// do your calculation here
+		g_pFontFace->GetMetrics(fontmetrics);
+		retval.width = (float)glyphmetrics->advanceWidth / (float)fontmetrics->designUnitsPerEm;
+		retval.height = (float)glyphmetrics->advanceHeight / (float)fontmetrics->designUnitsPerEm;
+
+		delete[]glyphmetrics;
+		glyphmetrics = NULL;
+
+		return retval;
+	}
 
     MainWindow() : pFactory(NULL), pRenderTarget(NULL), pBrush(NULL)
     {
@@ -132,9 +247,40 @@ public:
     LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
 
+// START: https://stackoverflow.com/questions/27220/how-to-convert-stdstring-to-lpcwstr-in-c-unicode
+wstring s2ws(const string& s)
+{
+	int len;
+	int slength = (int)s.length() + 1;
+	len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0);
+	wchar_t* buf = new wchar_t[len];
+	MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, buf, len);
+	wstring r(buf);
+	delete[] buf;
+	return r;
+}
+LPCWSTR stringToLPCWSTR(string str) {
+	std::wstring stemp = s2ws(str);
+	LPCWSTR result = stemp.c_str();
+	return result;
+}
+// END: https://stackoverflow.com/questions/27220/how-to-convert-stdstring-to-lpcwstr-in-c-unicode*/
+
+void LOut(string str) {
+	string s1 = str + "\n";
+	std::wstring widestr = std::wstring(s1.begin(), s1.end());
+	OutputDebugStringW(widestr.c_str());
+}
+
+const wchar_t *LStr(string str) {
+	string s1 = str + "\n";
+	std::wstring widestr = std::wstring(s1.begin(), s1.end());
+	return widestr.c_str();
+}
+
 HRESULT MainWindow::CreateDeviceIndependentResources()
 {
-	static const WCHAR msc_fontName[] = L"Merriweather";
+	static const WCHAR msc_fontName[] = L"Arial";
 	static const FLOAT msc_fontSize = 20;
 	HRESULT hr;
 
@@ -253,6 +399,11 @@ HRESULT MainWindow::CreateDeviceIndependentResources()
 		m_pTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 	}
 
+	for (int i = 32; i <= 126; i++) {
+		wchar_t chr = i;
+		GlyphSizes[i] = MainWindow::GetCharWidth(chr);
+	}
+
 	return hr;
 }
 
@@ -265,7 +416,8 @@ public:
 	static void Initialize(ID2D1Factory* pFactory)
 	{
 		FLOAT dpiX, dpiY;
-		pFactory->GetDesktopDpi(&dpiX, &dpiY);
+		dpiX = (FLOAT)GetDpiForWindow(GetDesktopWindow());
+		dpiY = dpiX;
 		scaleX = dpiX / 96.0f;
 		scaleY = dpiY / 96.0f;
 	}
@@ -314,8 +466,8 @@ HRESULT MainWindow::CreateGraphicsResources()
             const D2D1_COLOR_F color = D2D1::ColorF(0.0f, 0.0f, 0.0f);
             hr = pRenderTarget->CreateSolidColorBrush(color, &pBrush);
 
-			const D2D1_COLOR_F color2 = D2D1::ColorF(0.5f, 0.5f, 0.5f);
-			hr = pRenderTarget->CreateSolidColorBrush(color2, &pGrayBrush);
+			const D2D1_COLOR_F color2 = D2D1::ColorF(1.0f, 1.0f, 0.8f);
+			hr = pRenderTarget->CreateSolidColorBrush(color2, &pPaleYellowBrush);
 
             if (SUCCEEDED(hr))
             {
@@ -330,7 +482,7 @@ void MainWindow::DiscardGraphicsResources()
 {
     SafeRelease(&pRenderTarget);
     SafeRelease(&pBrush);
-	SafeRelease(&pGrayBrush);
+	SafeRelease(&pPaleYellowBrush);
 	SafeRelease(&m_pDWriteFactory);
 	SafeRelease(&m_pTextFormat);
 	SafeRelease(&m_pFontNamesTextFormat);
@@ -349,8 +501,8 @@ void MainWindow::toggleFormatting(string format, string newValue)
 		stopIndices.push_back(it->first);
 	}
 
-	formatStop *startsEnd = &formatStop();
-	formatStop *endsStart = &formatStop();
+	formatStop *startsEnd = new formatStop();
+	formatStop *endsStart = new formatStop();
 	startsEnd->value = "undefined";
 	endsStart->value = "undefined";
 
@@ -640,7 +792,7 @@ void MainWindow::OnPaint(bool verticalMove, bool click)
 					pRenderTarget->FillRectangle(&bbox, pBrush);
 				}
 				else {
-					pRenderTarget->FillRectangle(&bbox, pGrayBrush);
+					pRenderTarget->FillRectangle(&bbox, pPaleYellowBrush);
 				//}*/
 				string sFName = "icons/" + icons[i];
 				std::wstring wFName(sFName.begin(), sFName.end());
@@ -740,7 +892,7 @@ void MainWindow::OnPaint(bool verticalMove, bool click)
 			if (it->second.value == "super")
 			{
 				pOpenTextLayout->SetFontSize(10.0, scriptRange);
-				pOpenTextLayout->SetDrawingEffect(pGrayBrush, scriptRange);
+				pOpenTextLayout->SetDrawingEffect(pPaleYellowBrush, scriptRange);
 			}
 			else if (it->second.value == "sub")
 			{
@@ -835,17 +987,67 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
     return 0;
 }
 
+void splitString(std::string str, char delim, std::vector<std::string>& words)
+{
+	int i = 0, len = str.length();
+	std::string el;
+	while (i < len) {
+		if (str[i] == delim) {
+			words.push_back(el);
+			el = "";
+		}
+		else {
+			el += str[i];
+		}
+		i++;
+	}
+	words.push_back(el);
+}
+
 void MainWindow::UpdateCaretFromPosition(bool verticalMove, bool click, bool paint)
 {
 	if (pOpenTextLayout) {
 		BOOL isInside;
-		HRESULT hr = pOpenTextLayout->HitTestPoint(
-			-toolbarOrigin.x + cursorX,
-			-toolbarOrigin.y + cursorY,
-			&isTrailingHit,
-			&isInside,
-			&hitTestMetrics
-		);
+		vector<string> words;
+		float x = 0;
+		float y = 0.0;
+		int absCharIndex = 0;
+		splitString(userText, ' ', words);
+		float lineHeight = 0.0;
+		for (
+			size_t wordIndex = 0, wordCount = words.size();
+			wordIndex < wordCount;
+			wordIndex++
+			) {
+			float wordWidth = 0.0;
+			string word = words[wordIndex] + " ";
+			for (
+				size_t charIndex = 0, charCount = word.size();
+				charIndex < charCount;
+				charIndex++, absCharIndex++
+				) {
+				GlyphSize glyphSize = GlyphSizes[word[charIndex]];
+				wordWidth += glyphSize.width * 20.0;
+				lineHeight = 24.0;
+				if (x >= 500) {
+					x = wordWidth - GlyphSizes[' '].width * 20.0;
+					y += lineHeight;
+				}
+				if (
+					x >= -toolbarOrigin.x + cursorX &&
+					y + 14.0 >= -toolbarOrigin.y + cursorY
+					) {
+					hitTestMetrics.left = x;
+					hitTestMetrics.top = y;
+					hitTestMetrics.height = 24.0;
+					hitTestMetrics.textPosition = absCharIndex;
+					goto breakInnerLoop;
+				}
+				x += glyphSize.width * 20.0;
+			}
+		}
+	breakInnerLoop: {}
+	
 		textPosition = hitTestMetrics.textPosition + (isTrailingHit ? 1 : 0);
 		if (!verticalMove)
 		{
@@ -862,13 +1064,13 @@ void MainWindow::UpdateCaretFromPosition(bool verticalMove, bool click, bool pai
 void MainWindow::UpdateCaretFromIndex(bool verticalMove)
 {
 	if (pOpenTextLayout) {
-		pOpenTextLayout->HitTestTextPosition(
+		/*MainWindow::HitTestTextPosition(
 			textPosition,
 			isTrailingHit,
 			&cursorX,
 			&cursorY,
 			&hitTestMetrics
-		);
+		);*/
 		cursorX += toolbarOrigin.x;
 		cursorY += toolbarOrigin.y;
 		if (!verticalMove)
@@ -877,6 +1079,53 @@ void MainWindow::UpdateCaretFromIndex(bool verticalMove)
 		}
 		cursorY = hitTestMetrics.top + toolbarOrigin.y;
 	}
+}
+
+void MainWindow::HitTestTextPosition(
+	UINT32 textPosition,
+	bool isTrailing,
+	float* pointX,
+	float* pointY,
+	HitTestMetrics* metrics) {
+	vector<string> words;
+	float x = 0;
+	float y = 0.0;
+	UINT32 absCharIndex = 0;
+	splitString(userText, ' ', words);
+	float lineHeight = 0.0;
+	for (
+		size_t wordIndex = 0, wordCount = words.size();
+		wordIndex < wordCount;
+		wordIndex++
+		) {
+		float wordWidth = 0.0;
+		string word = words[wordIndex] + " ";
+		for (
+			size_t charIndex = 0, charCount = word.size();
+			charIndex < charCount;
+			charIndex++, absCharIndex++
+			) {
+			GlyphSize glyphSize = GlyphSizes[word[charIndex]];
+			wordWidth += glyphSize.width * 20.0;
+			lineHeight = 24.0;
+			if (x >= 500) {
+				x = wordWidth - GlyphSizes[' '].width * 20.0;
+				y += lineHeight;
+			}
+			if (
+				absCharIndex >= textPosition
+				) {
+				metrics->left = x;
+				metrics->top = y;
+				metrics->width = glyphSize.width * 20.0;
+				metrics->height = 24.0;
+				metrics->textPosition = absCharIndex;
+				goto breakInnerLoop;
+			}
+			x += glyphSize.width * 20.0;
+		}
+	}
+breakInnerLoop: {};
 }
 
 void MainWindow::SelectText()
@@ -895,22 +1144,22 @@ void MainWindow::SelectText()
 		UINT32 curIndex = 0;
 		for (auto& metric : lineMetrics)
 		{
-			DWRITE_HIT_TEST_METRICS startMetrics;
-			DWRITE_HIT_TEST_METRICS endMetrics;
+			HitTestMetrics startMetrics;
+			HitTestMetrics endMetrics;
 			float sx;
 			float sy;
 			float ex;
 			float ey;
 			if (startCharIndex >= curIndex && startCharIndex < (curIndex + metric.length) && endCharIndex >= curIndex && endCharIndex < (curIndex + metric.length))
 			{
-				pOpenTextLayout->HitTestTextPosition(
+				MainWindow::HitTestTextPosition(
 					startCharIndex,
 					false,
 					&sx,
 					&sy,
 					&startMetrics
 				);
-				pOpenTextLayout->HitTestTextPosition(
+				MainWindow::HitTestTextPosition(
 					endCharIndex,
 					false,
 					&ex,
@@ -918,18 +1167,18 @@ void MainWindow::SelectText()
 					&endMetrics
 				);
 				D2D1_RECT_F startRect = D2D1::RectF(startMetrics.left, toolbarOrigin.y + startMetrics.top, toolbarOrigin.x + endMetrics.left, toolbarOrigin.y + startMetrics.top + startMetrics.height);
-				pRenderTarget->FillRectangle(&startRect, pGrayBrush);
+				pRenderTarget->FillRectangle(&startRect, pPaleYellowBrush);
 			}
 			else if (startCharIndex >= curIndex && startCharIndex < (curIndex + metric.length))
 			{ // on the start line
-				pOpenTextLayout->HitTestTextPosition(
+				MainWindow::HitTestTextPosition(
 					startCharIndex,
 					false,
 					&sx,
 					&sy,
 					&startMetrics
 				);
-				pOpenTextLayout->HitTestTextPosition(
+				MainWindow::HitTestTextPosition(
 					curIndex + metric.length - 1,
 					true,
 					&ex,
@@ -937,20 +1186,20 @@ void MainWindow::SelectText()
 					&endMetrics
 				);
 				D2D1_RECT_F startRect = D2D1::RectF(startMetrics.left, toolbarOrigin.y + startMetrics.top, toolbarOrigin.x + endMetrics.left + endMetrics.width, toolbarOrigin.y + startMetrics.top + startMetrics.height);
-				pRenderTarget->FillRectangle(&startRect, pGrayBrush);
+				pRenderTarget->FillRectangle(&startRect, pPaleYellowBrush);
 			}
 			else if (curIndex > startCharIndex)
 			{ // after the start line
 				if (endCharIndex >= curIndex && endCharIndex < (curIndex + metric.length))
 				{ // on the end line
-					pOpenTextLayout->HitTestTextPosition(
+					MainWindow::HitTestTextPosition(
 						curIndex,
 						false,
 						&sx,
 						&sy,
 						&startMetrics
 					);
-					pOpenTextLayout->HitTestTextPosition(
+					MainWindow::HitTestTextPosition(
 						endCharIndex,
 						false,
 						&ex,
@@ -958,18 +1207,18 @@ void MainWindow::SelectText()
 						&endMetrics
 					);
 					D2D1_RECT_F endRect = D2D1::RectF(toolbarOrigin.x + startMetrics.left, toolbarOrigin.y + startMetrics.top, toolbarOrigin.x + endMetrics.left, toolbarOrigin.y + endMetrics.top + endMetrics.height);
-					pRenderTarget->FillRectangle(&endRect, pGrayBrush);
+					pRenderTarget->FillRectangle(&endRect, pPaleYellowBrush);
 				}
 				else if ((curIndex + metric.length) <= endCharIndex)
 				{ // between start and end lines
-					pOpenTextLayout->HitTestTextPosition(
+					MainWindow::HitTestTextPosition(
 						curIndex,
 						false,
 						&sx,
 						&sy,
 						&startMetrics
 					);
-					pOpenTextLayout->HitTestTextPosition(
+					MainWindow::HitTestTextPosition(
 						curIndex + metric.length - 1,
 						true,
 						&ex,
@@ -977,7 +1226,7 @@ void MainWindow::SelectText()
 						&endMetrics
 					);
 					D2D1_RECT_F endRect = D2D1::RectF(toolbarOrigin.x + startMetrics.left, toolbarOrigin.y + startMetrics.top, toolbarOrigin.x + endMetrics.left + endMetrics.width, toolbarOrigin.y + endMetrics.top + endMetrics.height);
-					pRenderTarget->FillRectangle(&endRect, pGrayBrush);
+					pRenderTarget->FillRectangle(&endRect, pPaleYellowBrush);
 				}
 			}
 			curIndex += metric.length;
