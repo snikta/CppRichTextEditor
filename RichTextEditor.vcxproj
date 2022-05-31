@@ -128,12 +128,14 @@
     <ClInclude Include="LoadBitmapFromFile.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SafeRelease.h" />
+    <ClInclude Include="vectorFonts.h" />
     <ClInclude Include="WICViewerD2D.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="colorConversion.cpp" />
     <ClCompile Include="LoadBitmapFromFile.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="vectorFonts.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

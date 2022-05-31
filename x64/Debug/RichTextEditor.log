@@ -1,58 +1,59 @@
 ﻿  main.cpp
-C:\C++\CppRichTextEditor\main.cpp(48,52): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(48,49): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(121,18): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(348,8): warning C4244: 'argument': conversion from 'UINT32' to 'FLOAT', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(350,3): warning C4267: 'argument': conversion from 'size_t' to 'UINT32', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(382,8): warning C4244: 'argument': conversion from 'UINT32' to 'FLOAT', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(384,3): warning C4267: 'argument': conversion from 'size_t' to 'UINT32', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(389,46): warning C4838: conversion from 'unsigned __int64' to 'UINT32' requires a narrowing conversion
-C:\C++\CppRichTextEditor\main.cpp(389,63): warning C4267: 'initializing': conversion from 'size_t' to 'UINT32', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(392,26): warning C4267: '+=': conversion from 'size_t' to 'UINT32', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(442,98): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(442,57): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(442,36): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(443,94): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(443,61): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(443,40): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(444,94): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(444,61): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(444,40): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(445,112): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(445,92): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(445,73): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(445,46): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(636,44): warning C4305: '=': truncation from 'double' to 'FLOAT'
-C:\C++\CppRichTextEditor\main.cpp(638,44): warning C4305: '=': truncation from 'double' to 'FLOAT'
-C:\C++\CppRichTextEditor\main.cpp(642,44): warning C4305: '=': truncation from 'double' to 'FLOAT'
-C:\C++\CppRichTextEditor\main.cpp(644,44): warning C4305: '=': truncation from 'double' to 'FLOAT'
-C:\C++\CppRichTextEditor\main.cpp(659,31): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(676,71): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(690,31): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(722,37): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(723,37): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(730,129): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(730,153): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(730,83): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(783,4): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(788,14): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(786,8): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(835,3): warning C4267: 'argument': conversion from 'size_t' to 'UINT32', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(921,34): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(926,48): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(992,31): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(1030,34): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(1033,20): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(1046,26): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(1010,8): warning C4101: 'isInside': unreferenced local variable
-C:\C++\CppRichTextEditor\main.cpp(1109,33): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(1112,19): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(1120,38): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(1125,25): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(1142,91): warning C4267: 'argument': conversion from 'size_t' to 'UINT32', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(1250,91): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(1256,91): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(1262,14): warning C4244: '=': conversion from 'const FLOAT' to 'int', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(1276,17): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-C:\C++\CppRichTextEditor\main.cpp(1404,14): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(37,31): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(68,52): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(68,49): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(141,18): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(245,36): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(368,8): warning C4244: 'argument': conversion from 'UINT32' to 'FLOAT', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(370,3): warning C4267: 'argument': conversion from 'size_t' to 'UINT32', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(402,8): warning C4244: 'argument': conversion from 'UINT32' to 'FLOAT', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(404,3): warning C4267: 'argument': conversion from 'size_t' to 'UINT32', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(409,46): warning C4838: conversion from 'unsigned __int64' to 'UINT32' requires a narrowing conversion
+C:\C++\CppRichTextEditor\main.cpp(409,63): warning C4267: 'initializing': conversion from 'size_t' to 'UINT32', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(412,26): warning C4267: '+=': conversion from 'size_t' to 'UINT32', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(462,98): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(462,57): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(462,36): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(463,94): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(463,61): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(463,40): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(464,94): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(464,61): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(464,40): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(465,112): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(465,92): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(465,73): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(465,46): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(656,44): warning C4305: '=': truncation from 'double' to 'FLOAT'
+C:\C++\CppRichTextEditor\main.cpp(658,44): warning C4305: '=': truncation from 'double' to 'FLOAT'
+C:\C++\CppRichTextEditor\main.cpp(662,44): warning C4305: '=': truncation from 'double' to 'FLOAT'
+C:\C++\CppRichTextEditor\main.cpp(664,44): warning C4305: '=': truncation from 'double' to 'FLOAT'
+C:\C++\CppRichTextEditor\main.cpp(679,31): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(696,71): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(710,31): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(742,37): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(743,37): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(750,129): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(750,153): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(750,83): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(803,4): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(808,14): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(806,8): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(855,3): warning C4267: 'argument': conversion from 'size_t' to 'UINT32', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(936,34): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(941,48): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(959,20): warning C4244: 'initializing': conversion from 'FLOAT' to 'int', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(991,20): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(992,11): warning C4244: '+=': conversion from 'float' to 'int', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(996,9): warning C4244: '-=': conversion from 'float' to 'int', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(1013,5): warning C4244: 'argument': conversion from 'int' to 'FLOAT', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(1012,5): warning C4244: 'argument': conversion from 'int' to 'FLOAT', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(1096,55): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(1076,8): warning C4101: 'isInside': unreferenced local variable
+C:\C++\CppRichTextEditor\main.cpp(1210,91): warning C4267: 'argument': conversion from 'size_t' to 'UINT32', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(1318,91): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(1324,91): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(1330,14): warning C4244: '=': conversion from 'const FLOAT' to 'int', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(1344,17): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\C++\CppRichTextEditor\main.cpp(1472,14): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
   RichTextEditor.vcxproj -> C:\C++\CppRichTextEditor\x64\Debug\RichTextEditor.exe
