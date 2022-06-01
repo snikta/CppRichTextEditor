@@ -103,6 +103,7 @@ map<int, GlyphSize> GlyphSizes = {};
 
 class MainWindow : public BaseWindow<MainWindow>
 {
+	vector<int>	lineLengths = {};
     ID2D1Factory            *pFactory;
     ID2D1HwndRenderTarget   *pRenderTarget;
     ID2D1SolidColorBrush    *pBrush;
@@ -968,11 +969,13 @@ void MainWindow::OnPaint(bool verticalMove, bool click)
 		const char* str = userText.c_str();
 		int x = 0;
 		int y = 0;
+		MainWindow::lineLengths = {};
+		int lineLength = 0;
 
 		vector<string> words;
 		int absCharIndex = 0;
 		splitString(userText, ' ', words);
-		float lineHeight = 0.0;
+		float lineHeight = 21.0;
 		for (
 			size_t wordIndex = 0, wordCount = words.size();
 			wordIndex < wordCount;
@@ -985,20 +988,21 @@ void MainWindow::OnPaint(bool verticalMove, bool click)
 				charIndex < charCount;
 				charIndex++, absCharIndex++
 				) {
-				wordWidth += glyphWidths[word[charIndex]-32];
-				lineHeight = 21.0;
-				if (x >= 500) {
-					x = wordWidth - glyphWidths[word[charIndex] - 32];
-					y += lineHeight;
-				}
-				x += glyphWidths[word[charIndex] - 32];
+				wordWidth += glyphWidths[word[charIndex] - 32];
 			}
-			x -= wordWidth;
+			if (x + wordWidth >= 500) {
+				x = 0;
+				y += lineHeight;
+				MainWindow::lineLengths.push_back(lineLength);
+				lineLength = 0;
+			}
+			lineLength += word.size();
 			const char* str = word.c_str();
 			do {
 				x += drawGlyph(*str, x, y, COLOR32(0, 0, 0, 255), bitmap, bitmapWidth, bitmapWidth * bitmapHeight * 4);
 			} while (*str++);
 		}
+		MainWindow::lineLengths.push_back(lineLength);
 		
 		ID2D1Bitmap* pBitmap = NULL;
 		hr = pRenderTarget->CreateBitmap(D2D1::SizeU(bitmapWidth, bitmapHeight), bitmap, bitmapWidth * 4, D2D1::BitmapProperties(D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)), &pBitmap);
@@ -1079,7 +1083,7 @@ void MainWindow::UpdateCaretFromPosition(bool verticalMove, bool click, bool pai
 		float y = 0.0;
 		int absCharIndex = 0;
 		splitString(userText, ' ', words);
-		float lineHeight = 0.0;
+		float lineHeight = 21.0;
 		for (
 			size_t wordIndex = 0, wordCount = words.size();
 			wordIndex < wordCount;
@@ -1090,17 +1094,19 @@ void MainWindow::UpdateCaretFromPosition(bool verticalMove, bool click, bool pai
 			for (
 				size_t charIndex = 0, charCount = word.size();
 				charIndex < charCount;
+				charIndex++
+				) {
+				wordWidth += glyphWidths[word[charIndex] - 32];
+			}
+			if (x + wordWidth >= 500) {
+				x = 0;
+				y += lineHeight;
+			}
+			for (
+				size_t charIndex = 0, charCount = word.size();
+				charIndex < charCount;
 				charIndex++, absCharIndex++
 				) {
-				GlyphSize glyphSize;
-				glyphSize.width = glyphWidths[word[charIndex] - 32];
-				glyphSize.height = 21.0;
-				wordWidth += glyphSize.width;
-				lineHeight = 21.0;
-				if (x >= 500) {
-					x = wordWidth - glyphWidths[' ' - 32];
-					y += lineHeight;
-				}
 				if (
 					x >= -toolbarOrigin.x + cursorX &&
 					y + 14.0 >= -toolbarOrigin.y + cursorY
@@ -1111,7 +1117,7 @@ void MainWindow::UpdateCaretFromPosition(bool verticalMove, bool click, bool pai
 					hitTestMetrics.textPosition = absCharIndex;
 					goto breakInnerLoop;
 				}
-				x += glyphSize.width;
+				x += glyphWidths[word[charIndex] - 32];
 			}
 		}
 	breakInnerLoop: {}
@@ -1156,11 +1162,16 @@ void MainWindow::HitTestTextPosition(
 	float* pointY,
 	HitTestMetrics* metrics) {
 	vector<string> words;
-	float x = 0;
+	float x = 0.0;
 	float y = 0.0;
 	UINT32 absCharIndex = 0;
 	splitString(userText, ' ', words);
-	float lineHeight = 0.0;
+	float lineHeight = 21.0;
+	metrics->left = 0;
+	metrics->top = 0;
+	metrics->width = 0;
+	metrics->height = 0;
+	metrics->textPosition = 0;
 	for (
 		size_t wordIndex = 0, wordCount = words.size();
 		wordIndex < wordCount;
@@ -1171,26 +1182,30 @@ void MainWindow::HitTestTextPosition(
 		for (
 			size_t charIndex = 0, charCount = word.size();
 			charIndex < charCount;
+			charIndex++
+			) {
+			wordWidth += glyphWidths[word[charIndex] - 32];
+		}
+		if (x + wordWidth >= 500) {
+			x = 0;
+			y += lineHeight;
+		}
+		for (
+			size_t charIndex = 0, charCount = word.size();
+			charIndex < charCount;
 			charIndex++, absCharIndex++
 			) {
-			GlyphSize glyphSize = GlyphSizes[word[charIndex]];
-			wordWidth += glyphSize.width;
-			lineHeight = 21.0;
-			if (x >= 500) {
-				x = wordWidth - GlyphSizes[' '].width;
-				y += lineHeight;
-			}
 			if (
 				absCharIndex >= textPosition
-				) {
+			) {
 				metrics->left = x;
 				metrics->top = y;
-				metrics->width = glyphSize.width;
+				metrics->width = glyphWidths[userText[absCharIndex] - 32];
 				metrics->height = 21.0;
 				metrics->textPosition = absCharIndex;
 				goto breakInnerLoop;
 			}
-			x += glyphSize.width;
+			x += glyphWidths[word[charIndex] - 32];
 		}
 	}
 breakInnerLoop: {};
@@ -1204,13 +1219,12 @@ void MainWindow::SelectText()
 		UINT32 endCharIndex = max(startTextPosition, textPosition);
 		DWRITE_TEXT_METRICS textMetrics;
 		UINT32 actualLineCount;
-		pOpenTextLayout->GetMetrics(&textMetrics);
-		UINT32 lineCount = textMetrics.lineCount;
-		vector<DWRITE_LINE_METRICS> lineMetrics(lineCount);
-		pOpenTextLayout->GetLineMetrics(lineMetrics.data(), lineMetrics.size(), &actualLineCount);
+		//pOpenTextLayout->GetMetrics(&textMetrics);
+		//UINT32 lineCount = textMetrics.lineCount;
+		//pOpenTextLayout->GetLineMetrics(lineMetrics.data(), lineMetrics.size(), &actualLineCount);
 
 		UINT32 curIndex = 0;
-		for (auto& metric : lineMetrics)
+		for (auto& metric : MainWindow::lineLengths)
 		{
 			HitTestMetrics startMetrics;
 			HitTestMetrics endMetrics;
@@ -1218,7 +1232,7 @@ void MainWindow::SelectText()
 			float sy;
 			float ex;
 			float ey;
-			if (startCharIndex >= curIndex && startCharIndex < (curIndex + metric.length) && endCharIndex >= curIndex && endCharIndex < (curIndex + metric.length))
+			if (startCharIndex >= curIndex && startCharIndex < (curIndex + metric) && endCharIndex >= curIndex && endCharIndex < (curIndex + metric))
 			{
 				MainWindow::HitTestTextPosition(
 					startCharIndex,
@@ -1237,7 +1251,7 @@ void MainWindow::SelectText()
 				D2D1_RECT_F startRect = D2D1::RectF(startMetrics.left, toolbarOrigin.y + startMetrics.top, toolbarOrigin.x + endMetrics.left, toolbarOrigin.y + startMetrics.top + startMetrics.height);
 				pRenderTarget->FillRectangle(&startRect, pPaleYellowBrush);
 			}
-			else if (startCharIndex >= curIndex && startCharIndex < (curIndex + metric.length))
+			else if (startCharIndex >= curIndex && startCharIndex < (curIndex + metric))
 			{ // on the start line
 				MainWindow::HitTestTextPosition(
 					startCharIndex,
@@ -1247,7 +1261,7 @@ void MainWindow::SelectText()
 					&startMetrics
 				);
 				MainWindow::HitTestTextPosition(
-					curIndex + metric.length - 1,
+					curIndex + metric - 1,
 					true,
 					&ex,
 					&ey,
@@ -1258,7 +1272,7 @@ void MainWindow::SelectText()
 			}
 			else if (curIndex > startCharIndex)
 			{ // after the start line
-				if (endCharIndex >= curIndex && endCharIndex < (curIndex + metric.length))
+				if (endCharIndex >= curIndex && endCharIndex < (curIndex + metric))
 				{ // on the end line
 					MainWindow::HitTestTextPosition(
 						curIndex,
@@ -1277,7 +1291,7 @@ void MainWindow::SelectText()
 					D2D1_RECT_F endRect = D2D1::RectF(toolbarOrigin.x + startMetrics.left, toolbarOrigin.y + startMetrics.top, toolbarOrigin.x + endMetrics.left, toolbarOrigin.y + endMetrics.top + endMetrics.height);
 					pRenderTarget->FillRectangle(&endRect, pPaleYellowBrush);
 				}
-				else if ((curIndex + metric.length) <= endCharIndex)
+				else if ((curIndex + metric) <= endCharIndex)
 				{ // between start and end lines
 					MainWindow::HitTestTextPosition(
 						curIndex,
@@ -1287,7 +1301,7 @@ void MainWindow::SelectText()
 						&startMetrics
 					);
 					MainWindow::HitTestTextPosition(
-						curIndex + metric.length - 1,
+						curIndex + metric - 1,
 						true,
 						&ex,
 						&ey,
@@ -1297,7 +1311,7 @@ void MainWindow::SelectText()
 					pRenderTarget->FillRectangle(&endRect, pPaleYellowBrush);
 				}
 			}
-			curIndex += metric.length;
+			curIndex += metric;
 		}
 	}
 }
